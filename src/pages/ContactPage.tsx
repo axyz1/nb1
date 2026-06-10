@@ -1,14 +1,27 @@
 import { useState } from 'react';
-import { MapPin, Phone, Mail, Send } from 'lucide-react';
+import { MapPin, Phone, Mail, Send, AlertCircle, CheckCircle } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 export default function ContactPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState('');
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError('');
+
+    const { error: insertError } = await supabase
+      .from('contact_messages')
+      .insert({ name: name.trim(), email: email.trim(), message: message.trim() });
+
+    if (insertError) {
+      setError('Не удалось отправить сообщение. Попробуйте позже.');
+      return;
+    }
+
     setSent(true);
     setName('');
     setEmail('');
@@ -97,8 +110,19 @@ export default function ContactPage() {
           </h2>
 
           {sent && (
-            <div className="bg-forest-100 text-forest-800 text-sm rounded-lg px-4 py-3 mb-5">
-              Сообщение отправлено! Мы свяжемся с вами в ближайшее время.
+            <div className="flex items-start gap-3 bg-forest-100 text-forest-800 text-sm rounded-lg px-4 py-3 mb-5">
+              <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium">Сообщение отправлено!</p>
+                <p className="text-forest-600 mt-0.5">Мы свяжемся с вами в ближайшее время.</p>
+              </div>
+            </div>
+          )}
+
+          {error && (
+            <div className="flex items-start gap-3 bg-red-50 text-red-700 text-sm rounded-lg px-4 py-3 mb-5">
+              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <p>{error}</p>
             </div>
           )}
 

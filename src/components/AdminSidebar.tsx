@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutGrid, FolderOpen, BookOpen, Calendar, LogOut, Image, Music, Palette, FileText } from 'lucide-react';
+import { LayoutGrid, FolderOpen, BookOpen, Calendar, LogOut, Image, Music, Palette, FileText, Mail } from 'lucide-react';
 import type { ItemType } from '../lib/types';
 import { ITEM_TYPE_LABELS, ITEM_TYPE_GROUPS } from '../lib/types';
 
@@ -9,6 +9,7 @@ interface Props {
 
 const navItems = [
   { to: '/admin', icon: LayoutGrid, label: 'Обзор', end: true },
+  { to: '/admin/messages', icon: Mail, label: 'Сообщения', end: false },
   { to: '/admin/categories', icon: FolderOpen, label: 'Категории', end: false },
   ...ITEM_TYPE_GROUPS.flatMap((group) =>
     group.types.map((t) => ({
