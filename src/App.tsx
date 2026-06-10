@@ -13,6 +13,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminCategories from './pages/AdminCategories';
 import AdminItems from './pages/AdminItems';
 import AdminMessages from './pages/AdminMessages';
+import AdminSettings from './pages/AdminSettings';
 import type { ItemType } from './lib/types';
 
 function AppRoutes() {
@@ -52,6 +53,7 @@ function AppRoutes() {
           <Route index element={<AdminDashboard />} />
           <Route path="messages" element={<AdminMessages />} />
           <Route path="categories" element={<AdminCategories />} />
+          <Route path="settings" element={<AdminSettings />} />
           <Route path="items" element={<AdminItems />} />
         </Route>
       </Routes>

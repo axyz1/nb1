@@ -1,31 +1,72 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { MapPin, Phone, Mail, Send, AlertCircle, CheckCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+
+function generateCaptcha() {
+  const a = Math.floor(Math.random() * 8) + 2;
+  const b = Math.floor(Math.random() * 8) + 2;
+  return { a, b };
+}
 
 export default function ContactPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
+  const [captchaAnswer, setCaptchaAnswer] = useState('');
+  const [honeypot, setHoneypot] = useState('');
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  const captcha = useMemo(() => generateCaptcha(), []);
+  // Re-generate on successful send
+  const [captchaGen, setCaptchaGen] = useState(0);
+  const currentCaptcha = useMemo(() => generateCaptcha(), [captchaGen]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
+    setSubmitting(true);
 
-    const { error: insertError } = await supabase
-      .from('contact_messages')
-      .insert({ name: name.trim(), email: email.trim(), message: message.trim() });
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke(
+        'send-contact-email',
+        {
+          body: {
+            name: name.trim(),
+            email: email.trim(),
+            message: message.trim(),
+            captcha_answer: captchaAnswer.trim(),
+            honeypot,
+            captcha_a: currentCaptcha.a,
+            captcha_b: currentCaptcha.b,
+          },
+        }
+      );
 
-    if (insertError) {
-      setError('Не удалось отправить сообщение. Попробуйте позже.');
-      return;
+      if (fnError) {
+        setError('Не удалось отправить сообщение. Попробуйте позже.');
+        return;
+      }
+
+      const result = data as { success?: boolean; error?: string };
+      if (result?.error) {
+        setError(result.error);
+        return;
+      }
+
+      setSent(true);
+      setName('');
+      setEmail('');
+      setMessage('');
+      setCaptchaAnswer('');
+      setHoneypot('');
+      setCaptchaGen((g) => g + 1);
+    } catch {
+      setError('Ошибка соединения. Попробуйте позже.');
+    } finally {
+      setSubmitting(false);
     }
-
-    setSent(true);
-    setName('');
-    setEmail('');
-    setMessage('');
   }
 
   return (
@@ -136,6 +177,7 @@ export default function ContactPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
+                autoComplete="name"
               />
             </div>
             <div>
@@ -148,6 +190,7 @@ export default function ContactPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                autoComplete="email"
               />
             </div>
             <div>
@@ -162,9 +205,43 @@ export default function ContactPage() {
                 required
               />
             </div>
-            <button type="submit" className="btn-primary flex items-center gap-2">
+
+            {/* Math captcha */}
+            <div>
+              <label className="block text-sm font-medium text-forest-700 mb-1">
+                Сколько будет {currentCaptcha.a} + {currentCaptcha.b}?
+              </label>
+              <input
+                className="input-field w-32"
+                value={captchaAnswer}
+                onChange={(e) => setCaptchaAnswer(e.target.value)}
+                required
+                inputMode="numeric"
+                autoComplete="off"
+              />
+            </div>
+
+            {/* Honeypot — hidden from humans, bots fill it */}
+            <div className="absolute -left-[9999px] opacity-0 h-0 overflow-hidden" aria-hidden="true">
+              <label htmlFor="hp_website">Website</label>
+              <input
+                id="hp_website"
+                type="text"
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className="btn-primary flex items-center gap-2 disabled:opacity-50"
+            >
               <Send className="w-4 h-4" />
-              Отправить
+              {submitting ? 'Отправка...' : 'Отправить'}
             </button>
           </form>
         </div>
