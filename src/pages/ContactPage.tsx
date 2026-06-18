@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { MapPin, Phone, Mail, Send, AlertCircle, CheckCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useSiteSettings } from '../lib/settings';
 
 function generateCaptcha() {
   const a = Math.floor(Math.random() * 8) + 2;
@@ -9,6 +10,7 @@ function generateCaptcha() {
 }
 
 export default function ContactPage() {
+  const { settings } = useSiteSettings();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
@@ -18,8 +20,6 @@ export default function ContactPage() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const captcha = useMemo(() => generateCaptcha(), []);
-  // Re-generate on successful send
   const [captchaGen, setCaptchaGen] = useState(0);
   const currentCaptcha = useMemo(() => generateCaptcha(), [captchaGen]);
 
@@ -72,61 +72,59 @@ export default function ContactPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
       <h1 className="font-display text-3xl md:text-4xl font-bold text-forest-900 mb-3">
-        Связаться с нами
+        {settings.contact_page_title}
       </h1>
       <p className="text-forest-600 mb-10 max-w-xl">
-        Напишите нам, если у вас есть вопросы, предложения или вы хотите
-        заказать продукцию. Мы обязательно ответим.
+        {settings.contact_page_subtitle}
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
         {/* Contact info */}
         <div className="space-y-6">
-          <div className="card p-6">
-            <div className="flex items-start gap-4">
-              <div className="p-3 bg-forest-100 rounded-lg text-forest-700">
-                <MapPin className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-forest-900 mb-1">Адрес</h3>
-                <p className="text-sm text-forest-600">
-                  г. Норильск, ул. Богдана Хмельницкого, д. 1, офис 5
-                </p>
+          {settings.contact_address && (
+            <div className="card p-6">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-forest-100 rounded-lg text-forest-700">
+                  <MapPin className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-forest-900 mb-1">Адрес</h3>
+                  <p className="text-sm text-forest-600">{settings.contact_address}</p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
-          <div className="card p-6">
-            <div className="flex items-start gap-4">
-              <div className="p-3 bg-forest-100 rounded-lg text-forest-700">
-                <Phone className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-forest-900 mb-1">Телефоны</h3>
-                <p className="text-sm text-forest-600">8 (3919) 46-91-14</p>
-                <p className="text-sm text-forest-600">8-903-989-89-10</p>
+          {settings.contact_phone && (
+            <div className="card p-6">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-forest-100 rounded-lg text-forest-700">
+                  <Phone className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-forest-900 mb-1">Телефон</h3>
+                  <p className="text-sm text-forest-600">{settings.contact_phone}</p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
-          <div className="card p-6">
-            <div className="flex items-start gap-4">
-              <div className="p-3 bg-forest-100 rounded-lg text-forest-700">
-                <Mail className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-forest-900 mb-1">Электронная почта</h3>
-                <p className="text-sm text-forest-600">
-                  Напишите через форму — мы обязательно ответим
-                </p>
+          {settings.contact_email_display && (
+            <div className="card p-6">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-forest-100 rounded-lg text-forest-700">
+                  <Mail className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-forest-900 mb-1">Электронная почта</h3>
+                  <p className="text-sm text-forest-600">{settings.contact_email_display}</p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           <div className="bg-forest-50 border border-forest-200 rounded-xl p-5">
-            <h3 className="font-display font-semibold text-forest-900 mb-2">
-              Как купить
-            </h3>
+            <h3 className="font-display font-semibold text-forest-900 mb-2">Как купить</h3>
             <ol className="space-y-2 text-sm text-forest-600">
               <li className="flex items-start gap-2">
                 <span className="text-forest-700 font-bold">1.</span>
@@ -169,9 +167,7 @@ export default function ContactPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-forest-700 mb-1">
-                Имя
-              </label>
+              <label className="block text-sm font-medium text-forest-700 mb-1">Имя</label>
               <input
                 className="input-field"
                 value={name}
@@ -181,9 +177,7 @@ export default function ContactPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-forest-700 mb-1">
-                Email
-              </label>
+              <label className="block text-sm font-medium text-forest-700 mb-1">Email</label>
               <input
                 type="email"
                 className="input-field"
@@ -194,9 +188,7 @@ export default function ContactPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-forest-700 mb-1">
-                Сообщение
-              </label>
+              <label className="block text-sm font-medium text-forest-700 mb-1">Сообщение</label>
               <textarea
                 className="input-field"
                 rows={5}
@@ -206,7 +198,6 @@ export default function ContactPage() {
               />
             </div>
 
-            {/* Math captcha */}
             <div>
               <label className="block text-sm font-medium text-forest-700 mb-1">
                 Сколько будет {currentCaptcha.a} + {currentCaptcha.b}?
@@ -221,7 +212,6 @@ export default function ContactPage() {
               />
             </div>
 
-            {/* Honeypot — hidden from humans, bots fill it */}
             <div className="absolute -left-[9999px] opacity-0 h-0 overflow-hidden" aria-hidden="true">
               <label htmlFor="hp_website">Website</label>
               <input

@@ -11,36 +11,49 @@ export type ItemType =
 
 export const ITEM_TYPE_LABELS: Record<ItemType, string> = {
   book: 'Книга',
-  postcard: 'Открытки',
+  postcard: 'Открытка',
   calendar_kvart: 'Квартальный',
   calendar_perekid: 'Перекидной',
-  calendar_poster: 'Постер-календарь',
+  calendar_poster: 'Постер',
   painting: 'Картина',
   music: 'Музыка',
   design: 'Дизайн',
-  poster: 'Постер',
+  poster: 'Плакат',
 };
 
-export const ITEM_TYPE_GROUPS: { label: string; types: ItemType[] }[] = [
-  { label: 'Книги', types: ['book'] },
-  { label: 'Открытки', types: ['postcard'] },
+export const ITEM_TYPE_GROUPS = [
+  { label: 'Книги', types: ['book'] as ItemType[] },
+  { label: 'Открытки', types: ['postcard'] as ItemType[] },
   {
     label: 'Календари',
-    types: ['calendar_kvart', 'calendar_perekid', 'calendar_poster'],
+    types: ['calendar_kvart', 'calendar_perekid', 'calendar_poster'] as ItemType[],
   },
-  {
-    label: 'Другое',
-    types: ['painting', 'music', 'design', 'poster'],
-  },
+  { label: 'Другое', types: ['painting', 'music', 'design', 'poster'] as ItemType[] },
 ];
 
 export interface Category {
   id: string;
   name: string;
   slug: string;
-  description: string | null;
+  description?: string;
   sort_order: number;
-  created_at: string;
+}
+
+export interface PortfolioItem {
+  id: string;
+  title: string;
+  description?: string;
+  image_url?: string;
+  category_id?: string;
+  item_type: ItemType;
+  author?: string;
+  year?: number;
+  link?: string;
+  sort_order: number;
+  price?: number;
+  publisher?: string;
+  pages?: number;
+  category?: Category;
 }
 
 export interface ContactMessage {
@@ -52,20 +65,40 @@ export interface ContactMessage {
   is_read: boolean;
 }
 
-export interface PortfolioItem {
+export interface SiteSettings {
+  id: number;
+  // Contact/functional
+  contact_email: string;
+  // Appearance
+  logo_url?: string;
+  banner_url?: string;
+  site_title: string;
+  banner_title: string;
+  banner_subtitle: string;
+  primary_color: string;
+  secondary_color: string;
+  accent_color: string;
+  hero_bg_color: string;
+  // Text content
+  contact_page_title: string;
+  contact_page_subtitle: string;
+  contact_address: string;
+  contact_phone: string;
+  contact_email_display: string;
+  footer_about: string;
+  reviews_page_title: string;
+  reviews_page_subtitle: string;
+  updated_at?: string;
+}
+
+export interface Review {
   id: string;
-  title: string;
-  description: string | null;
-  image_url: string | null;
-  category_id: string | null;
-  item_type: ItemType;
-  author: string | null;
-  year: number | null;
-  link: string | null;
+  author_name: string;
+  author_role?: string;
+  author_avatar_url?: string;
+  content: string;
+  rating: number;
+  is_published: boolean;
   sort_order: number;
   created_at: string;
-  category?: Category | null;
-  price?: string | null;
-  publisher?: string | null;
-  pages?: number | null;
 }

@@ -4,12 +4,14 @@ import { supabase } from '../lib/supabase';
 import type { Category, ItemType, PortfolioItem } from '../lib/types';
 import { ITEM_TYPE_LABELS, ITEM_TYPE_GROUPS } from '../lib/types';
 import PortfolioCard from '../components/PortfolioCard';
+import { useSiteSettings } from '../lib/settings';
 
 interface Props {
   activeType: ItemType | null;
 }
 
 export default function PortfolioPage({ activeType }: Props) {
+  const { settings } = useSiteSettings();
   const [items, setItems] = useState<PortfolioItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -75,18 +77,29 @@ export default function PortfolioPage({ activeType }: Props) {
     <div>
       {/* Hero — only on main page */}
       {!activeType && (
-        <section className="relative bg-gradient-to-br from-forest-900 via-forest-800 to-forest-950 text-white overflow-hidden">
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-20 -left-20 w-72 h-72 bg-forest-400 rounded-full blur-3xl" />
-            <div className="absolute bottom-10 right-10 w-96 h-96 bg-forest-300 rounded-full blur-3xl" />
-          </div>
+        <section
+          className="relative text-white overflow-hidden"
+          style={
+            settings.banner_url
+              ? { backgroundImage: `url(${settings.banner_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+              : { background: `linear-gradient(135deg, ${settings.hero_bg_color ?? '#1a3a0a'}, ${settings.primary_color ?? '#2D5016'})` }
+          }
+        >
+          {settings.banner_url && (
+            <div className="absolute inset-0 bg-black/50" />
+          )}
+          {!settings.banner_url && (
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-20 -left-20 w-72 h-72 bg-forest-400 rounded-full blur-3xl" />
+              <div className="absolute bottom-10 right-10 w-96 h-96 bg-forest-300 rounded-full blur-3xl" />
+            </div>
+          )}
           <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-16 md:py-24">
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
-              Книги &<br />
-              <span className="text-forest-300">Календари</span>
+              {settings.banner_title}
             </h1>
             <p className="text-forest-200 text-lg md:text-xl max-w-xl leading-relaxed">
-              Предлагаем вашему вниманию книги, открытки и календари о Норильске и Таймыре
+              {settings.banner_subtitle}
             </p>
           </div>
         </section>

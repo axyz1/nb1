@@ -1,8 +1,9 @@
 import { Link, useLocation } from 'react-router-dom';
-import { BookOpen, Calendar, Shield, Menu, X } from 'lucide-react';
+import { BookOpen, Calendar, Shield, Menu, X, Star } from 'lucide-react';
 import { useState } from 'react';
 import { ITEM_TYPE_GROUPS } from '../lib/types';
 import type { ItemType } from '../lib/types';
+import { useSiteSettings } from '../lib/settings';
 
 interface Props {
   onNavigate: (type: ItemType | null) => void;
@@ -13,6 +14,7 @@ export default function Header({ onNavigate, activeType }: Props) {
   const location = useLocation();
   const isAdmin = location.pathname.startsWith('/admin');
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { settings } = useSiteSettings();
 
   return (
     <header className="bg-forest-900 text-white sticky top-0 z-50">
@@ -20,18 +22,28 @@ export default function Header({ onNavigate, activeType }: Props) {
         {/* Top bar */}
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-3 group" onClick={() => onNavigate(null)}>
-            <div className="flex items-center gap-2">
-              <BookOpen className="w-6 h-6 text-forest-300 group-hover:text-forest-200 transition-colors" />
-              <Calendar className="w-5 h-5 text-forest-400 group-hover:text-forest-300 transition-colors" />
-            </div>
-            <div>
-              <span className="font-display text-lg font-semibold tracking-tight block leading-tight">
-                НорильскБук
-              </span>
-              <span className="text-[10px] text-forest-400 uppercase tracking-widest">
-                Издательство
-              </span>
-            </div>
+            {settings.logo_url ? (
+              <img
+                src={settings.logo_url}
+                alt={settings.site_title}
+                className="h-10 w-auto object-contain"
+              />
+            ) : (
+              <>
+                <div className="flex items-center gap-2">
+                  <BookOpen className="w-6 h-6 text-forest-300 group-hover:text-forest-200 transition-colors" />
+                  <Calendar className="w-5 h-5 text-forest-400 group-hover:text-forest-300 transition-colors" />
+                </div>
+                <div>
+                  <span className="font-display text-lg font-semibold tracking-tight block leading-tight">
+                    {settings.site_title}
+                  </span>
+                  <span className="text-[10px] text-forest-400 uppercase tracking-widest">
+                    Издательство
+                  </span>
+                </div>
+              </>
+            )}
           </Link>
 
           <div className="flex items-center gap-3">
@@ -108,7 +120,6 @@ export default function Header({ onNavigate, activeType }: Props) {
                     >
                       {group.label}
                     </button>
-                    {/* Sub-items for calendar group on mobile */}
                     <div className="sm:hidden pl-4">
                       {group.types.map((t) => (
                         <button
@@ -131,7 +142,6 @@ export default function Header({ onNavigate, activeType }: Props) {
                         </button>
                       ))}
                     </div>
-                    {/* Desktop dropdown */}
                     <div className="hidden sm:block absolute top-full left-0 pt-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                       <div className="bg-forest-800 rounded-lg shadow-xl py-1 min-w-[160px]">
                         {group.types.map((t) => (
@@ -157,6 +167,22 @@ export default function Header({ onNavigate, activeType }: Props) {
                 )}
               </li>
             ))}
+            <li>
+              <Link
+                to="/reviews"
+                onClick={() => setMobileOpen(false)}
+                className={`block px-3 py-2 sm:py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  location.pathname === '/reviews'
+                    ? 'bg-forest-800 text-forest-100'
+                    : 'text-forest-300 hover:text-white hover:bg-forest-800/60'
+                }`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <Star className="w-3.5 h-3.5" />
+                  Отзывы
+                </span>
+              </Link>
+            </li>
             <li>
               <Link
                 to="/contact"
